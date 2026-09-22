@@ -4,12 +4,12 @@
 也不配置自动拉取私有源码的构建任务。
 
 1. 在私有仓库构建并运行 `tools/release/build_runtime_wheel.py`。脚本调用 Release 构建，
-   从显式文件清单生成 wheel，检查 x64 / CPython ABI / DLL 依赖，并附带许可文本。
+   从显式文件清单生成 wheel，检查 x64 / CPython ABI / 原生依赖，并附带许可文本。
 2. 在本地 `dist/<版本>/` 准备四个文件：wheel、`release.json`、`requirements.txt`、`SHA256SUMS.txt`。
    这个目录被 Git 忽略，二进制不进入 Git 历史。
 3. 执行 `python tools/verify_release.py dist/<版本>`，在新虚拟环境安装，运行
    `python -I examples/smoke.py`；再运行匹配 GeoPhys 的无窗口集成资格验证。
-4. 将经过验证的 `release.json` 复制为 `releases/<版本>.json`，将生成的 `requirements.txt`
+4. 对于正式版，将经过验证的 `release.json` 复制为 `releases/<版本>.json`，将生成的 `requirements.txt`
    复制到仓库根目录，更新默认版本和说明。两处 SHA-256 必须与准备上传的 wheel 一致。
 5. 经仓库所有者确认后，提交并推送本仓库的文档、脚本和版本清单；创建 `v<版本>` 的
    GitHub Release，上传上述四个文件。Flora 和 GeoPhys 的源码改动在各自仓库处理。
@@ -19,7 +19,7 @@
 wheel 内的 Python 是允许分发的运行时部分；增加 Python 文件、原生依赖或平台时，
 先更新私有导出清单并重新验证。不要在同一个版本 tag 下替换不同内容的 wheel。
 
-从 0.1.1 起，构建器从 Visual Studio 的 release x64 redist 目录提取三个未修改的 VC++ DLL，
+Windows 从 0.1.1 起，构建器从 Visual Studio 的 release x64 redist 目录提取三个未修改的 VC++ DLL，
 并审计这些 DLL 的间接依赖。不要从 System32 或非官方 DLL 网站取文件，不打包 debug runtime。
 用户不需要运行 `vc_redist.x64.exe`；DLL 随 wheel 安装在 native 模块和 VLM 工具旁。
 应用本地运行库的更新由维护者通过新 wheel 分发，构建时应使用受支持且已更新的工具链。
@@ -39,3 +39,13 @@ python -I examples\smoke.py
 
 首版验证仅覆盖 Windows x64／CPython 3.13／本机 NVIDIA Vulkan 的无窗口路径。
 新的 GPU、系统和 Python ABI 应分别构建、验证并登记，不能仅重命名 wheel 标签。
+
+## Linux 预发布版本
+
+Linux `0.1.2rc1` 使用已完成云端编译与安装检查的候选 wheel，保留原始 wheel 和清单字节，
+不将其描述为已通过 GPU 验收。单独提供 `requirements-linux.txt` 和 `LINUX_TESTING.md`，
+不修改 Windows 的根目录 `requirements.txt` 或 `install.py` 默认版本。
+
+发布时将 `smoke_installed.py`、`LINUX_TESTING.md` 与四个发行文件一并上传，
+为新增附件补充 `SHA256SUMS.txt`。GitHub Release 必须标记 `prerelease=true`，
+且不设为 latest。公开下载后校验所有附件的散列；Linux GPU 验收由测试机器继续完成。

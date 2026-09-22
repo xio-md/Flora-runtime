@@ -8,7 +8,37 @@ import hashlib
 import io
 import json
 from pathlib import Path, PurePosixPath
+import re
+import stat
 import zipfile
+
+
+def verify_native_payload(manifest: dict, archive: zipfile.ZipFile):
+    platform = manifest["platform_tag"]
+    names = set(archive.namelist())
+    if platform == "linux_x86_64":
+        native = {"FloraRenderPyNative.so", "flora-vlm-bake", "flora-vlm-inspect", "flora-vlm-delta"}
+        folder = "flora_runtime/bin/linux-x64/"
+        if (manifest.get("linux_baseline") != {"id": "ubuntu", "version_id": "24.04", "libc": "glibc", "libc_min": "2.39"}
+                or manifest.get("qualification") != {"status": "candidate", "gpu": "not_run"}
+                or manifest.get("capabilities") != {"external_gpu_interop": False}):
+            raise ValueError("Incorrect Linux candidate support declaration")
+        for name in native - {"FloraRenderPyNative.so"}:
+            if folder + name not in names or not (archive.getinfo(folder + name).external_attr >> 16) & stat.S_IXUSR:
+                raise ValueError(f"Missing Linux executable permission: {name}")
+    elif platform == "win_amd64":
+        native = {"FloraRenderPyNative.pyd", "flora-vlm-bake.exe", "flora-vlm-inspect.exe", "flora-vlm-delta.exe"}
+        folder = "flora_runtime/bin/windows-x64/"
+        if "bundled_msvc" in manifest:
+            libraries = {"msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"}
+            if (manifest["bundled_msvc"].get("deployment") != "app-local"
+                    or set(manifest["bundled_msvc"].get("files", [])) != libraries):
+                raise ValueError("Incorrect app-local VC runtime declaration")
+            native.update(libraries)
+    else:
+        raise ValueError("Unsupported wheel platform")
+    if {name for name in names if name.startswith("flora_runtime/bin/")} != {folder + name for name in native}:
+        raise ValueError("Unexpected or missing native payload files")
 
 
 def verify(directory: Path):
@@ -17,7 +47,10 @@ def verify(directory: Path):
         raise ValueError("Unknown release schema")
     for asset in release["assets"]:
         filename = asset["filename"]
-        if Path(filename).name != filename or not filename.endswith("-cp313-cp313-win_amd64.whl"):
+        platform = asset["platform_tag"]
+        if (platform not in {"win_amd64", "linux_x86_64"} or Path(filename).name != filename
+                or "\\" in filename or ":" in filename
+                or filename != f"flora_render-{release['version']}-cp313-cp313-{platform}.whl"):
             raise ValueError("Invalid wheel filename")
         wheel = directory / filename
         data = wheel.read_bytes()
@@ -34,17 +67,21 @@ def verify(directory: Path):
                     raise ValueError(f"Unsafe archive path: {name}")
                 if path.parts[0] not in {"flora", "flora_backend", "flora_runtime", info}:
                     raise ValueError(f"Unexpected payload root: {name}")
-                if path.suffix.lower() not in {".py", ".pyd", ".exe", ".dll", ".txt", ".md", ".json", ""}:
+                if stat.S_ISLNK(archive.getinfo(name).external_attr >> 16):
+                    raise ValueError(f"Unexpected symlink: {name}")
+                if path.suffix.lower() not in {".py", ".pyd", ".exe", ".dll", ".so", ".txt", ".md", ".json", ""}:
                     raise ValueError(f"Unapproved payload type (source/debug/build artifact): {name}")
             manifest = json.loads(archive.read("flora_runtime/runtime.json"))
-            if "bundled_msvc" in manifest:
-                required = {f"flora_runtime/bin/windows-x64/{name}"
-                            for name in ("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")}
-                if not required.issubset(names) or manifest["bundled_msvc"]["deployment"] != "app-local":
-                    raise ValueError("Incomplete app-local VC runtime")
+            verify_native_payload(manifest, archive)
             if (manifest["version"] != release["version"] or manifest["shaders"] != "embedded"
+                    or manifest["platform_tag"] != platform
+                    or manifest["python_tag"] != asset["python_tag"] or manifest["abi_tag"] != asset["abi_tag"]
                     or manifest["geophys_adapter_abi"] != release["geophys_adapter_abi"]):
                 raise ValueError("Wheel/release contract mismatch")
+            if platform == "linux_x86_64":
+                for key in ("linux_baseline", "qualification", "capabilities"):
+                    if manifest[key] != release.get(key):
+                        raise ValueError(f"Linux release/wheel mismatch: {key}")
             payload = {name for name in names if not name.startswith(info + "/")
                        and name != "flora_runtime/runtime.json"}
             if payload != set(manifest["files"]):
@@ -63,6 +100,19 @@ def verify(directory: Path):
                 if digest != expected or int(size) != len(content):
                     raise ValueError(f"Invalid wheel RECORD: {name}")
             print(f"PASS {filename}: {len(payload)} approved payload files; hashes and RECORD verified")
+    sums = directory / "SHA256SUMS.txt"
+    if sums.is_file():
+        checked = set()
+        for line in sums.read_text(encoding="utf-8").splitlines():
+            digest, name = line.split("  ", 1)
+            if (not re.fullmatch(r"[0-9a-f]{64}", digest) or Path(name).name != name
+                    or "\\" in name or ":" in name or name in checked):
+                raise ValueError("Invalid SHA256SUMS entry")
+            if hashlib.sha256((directory / name).read_bytes()).hexdigest() != digest:
+                raise ValueError(f"Attachment hash mismatch: {name}")
+            checked.add(name)
+        if not ({asset["filename"] for asset in release["assets"]} | {"release.json", "requirements.txt"}).issubset(checked):
+            raise ValueError("SHA256SUMS does not cover the release files")
 
 
 if __name__ == "__main__":

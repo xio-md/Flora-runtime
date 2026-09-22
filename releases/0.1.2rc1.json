@@ -1,0 +1,29 @@
+{
+  "assets": [
+    {
+      "abi_tag": "cp313",
+      "filename": "flora_render-0.1.2rc1-cp313-cp313-linux_x86_64.whl",
+      "platform_tag": "linux_x86_64",
+      "python_tag": "cp313",
+      "sha256": "e8beedbb76d7aed7c3c5b3726b8bd1cfd2718029affe87019d9b5018552d7661",
+      "size": 4139817,
+      "url": "https://github.com/xio-md/Flora-runtime/releases/download/v0.1.2rc1/flora_render-0.1.2rc1-cp313-cp313-linux_x86_64.whl"
+    }
+  ],
+  "capabilities": {
+    "external_gpu_interop": false
+  },
+  "geophys_adapter_abi": "geophys.flora_adapter.v4",
+  "linux_baseline": {
+    "id": "ubuntu",
+    "libc": "glibc",
+    "libc_min": "2.39",
+    "version_id": "24.04"
+  },
+  "qualification": {
+    "gpu": "not_run",
+    "status": "candidate"
+  },
+  "schema": "flora.release.v1",
+  "version": "0.1.2rc1"
+}

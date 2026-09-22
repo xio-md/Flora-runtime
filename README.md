@@ -3,10 +3,15 @@
 Flora 的二进制交付入口，供独立 Python 程序和 GeoPhys 使用。渲染核心在私有仓库构建；
 本仓库保存安装脚本、版本清单和示例，wheel 通过 [Releases](https://github.com/xio-md/Flora-runtime/releases) 分发。
 
-当前版本 [**0.1.1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.1)
+Windows 正式版 [**0.1.1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.1)
 已将所需 VC++ DLL 随 wheel 打包，无需另外安装运行库。
 
-| 首版支持范围 | 要求 |
+Linux 测试版 [**0.1.2rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.2rc1)
+面向 **Ubuntu 24.04 x64 / CPython 3.13**。已通过编译、安装和原生导入检查，
+GPU 渲染/深度/VLM 尚待实机验收，Linux GPU 共享功能暂不支持。
+安装和测试步骤见 [Linux 测试指南](LINUX_TESTING.md)。
+
+| Windows 正式版支持范围 | 要求 |
 | --- | --- |
 | 系统 / Python | Windows 10/11 x64，CPython 3.13 常规 GIL 版本 |
 | GPU | 支持 Vulkan ray query 的 GPU 和已安装的驱动；本机验证为 NVIDIA |
@@ -16,9 +21,10 @@ Flora 的二进制交付入口，供独立 Python 程序和 GeoPhys 使用。渲
 
 无需 Flora 源码、Visual Studio、CMake、Vulkan SDK 或 VC++ Redistributable，
 无需手动复制 DLL 或配置 PATH。显卡驱动和 Windows 自带系统组件由用户环境提供。
-当前不提供 Linux、macOS、其他 Python ABI 或 free-threaded Python 的二进制。
+当前不提供 macOS、其他 Python ABI 或 free-threaded Python 的二进制。
+Linux 测试包仅面向上述 Ubuntu 版本，不是通用 manylinux 包。
 
-## 安装
+## Windows 安装
 
 在要使用 Flora 的 Python 环境中执行一条标准 pip 命令，无需克隆本仓库：
 
@@ -44,7 +50,19 @@ python -m pip install .\dist\0.1.1\flora_render-0.1.1-cp313-cp313-win_amd64.whl
 
 最短形式 `pip install flora-render` 需要另行把同一 wheel 发布到所控制的 PyPI 项目。
 目前仅通过 GitHub Releases 发布；请使用上面的明确 URL，不依赖 PyPI 上的同名项目。
-`install.py` 保留为辅助工具，普通使用无需运行。
+`install.py` 保留为 Windows 辅助工具，普通使用无需运行。
+
+## Linux 测试版安装
+
+在 Ubuntu 24.04 x64 的常规 Python 3.13 环境中执行：
+
+```bash
+python3.13 -m pip install -r https://raw.githubusercontent.com/xio-md/Flora-runtime/v0.1.2rc1/requirements-linux.txt
+```
+
+建议先建立虚拟环境，完整命令和 GPU 检查见 [Linux 测试指南](LINUX_TESTING.md)。
+无需 Vulkan SDK、编译器或私有源码；系统仍需兼容显卡驱动及 Vulkan 运行库。
+根目录 `requirements.txt` 继续固定 Windows 正式版；Linux 使用单独的 `requirements-linux.txt`。
 
 ## 与 GeoPhys 使用
 
@@ -68,7 +86,7 @@ visualizer = source.build_visualizer(backend="flora")  # source 为已有 GeoPhy
 `GEOPHYS_FLORA_PYTHON_DIR`，它们仍会优先选择开发安装；使用 wheel 前应清除这些旧覆盖值。
 同一 Python 进程中切换已加载的原生安装会被拒绝，需要重启该 Python 进程。
 
-## 包含哪些文件
+## Windows 包含哪些文件
 
 - `flora`、`flora_backend`：可读的 Python 接口和运行时实现。
 - `flora_runtime`：安装位置发现、完整性诊断和用户缓存路径。
