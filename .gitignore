@@ -1,0 +1,10 @@
+/dist/
+/.venv/
+/output/
+__pycache__/
+*.py[cod]
+*.whl
+*.pyd
+*.dll
+*.exe
+*.pdb

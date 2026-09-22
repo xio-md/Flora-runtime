@@ -1,0 +1,16 @@
+{
+  "assets": [
+    {
+      "abi_tag": "cp313",
+      "filename": "flora_render-0.1.1-cp313-cp313-win_amd64.whl",
+      "platform_tag": "win_amd64",
+      "python_tag": "cp313",
+      "sha256": "8a3fcaa55353ade8669c15747cb2530eb51def6c9cd98447682534cc36d54260",
+      "size": 2669540,
+      "url": "https://github.com/xio-md/Flora-runtime/releases/download/v0.1.1/flora_render-0.1.1-cp313-cp313-win_amd64.whl"
+    }
+  ],
+  "geophys_adapter_abi": "geophys.flora_adapter.v4",
+  "schema": "flora.release.v1",
+  "version": "0.1.1"
+}
