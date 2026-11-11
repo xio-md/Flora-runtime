@@ -6,6 +6,9 @@ Flora 的二进制交付入口，供独立 Python 程序和 GeoPhys 使用。渲
 Windows 正式版 [**0.1.1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.1)
 已将所需 VC++ DLL 随 wheel 打包，无需另外安装运行库。
 
+Windows 预发布版 [**0.1.3rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.3rc1)
+支持 GeoPhys 的自动光照、反射探针和 DLSS RR 预览。安装命令见 [Windows DLSS RR 预发布](#windows-dlss-rr-预发布)。
+
 Linux 测试版 [**0.1.2rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.2rc1)
 面向 **Ubuntu 24.04 x64 / CPython 3.13**。已通过编译、安装和原生导入检查，
 GPU 渲染/深度/VLM 尚待实机验收，Linux GPU 共享功能暂不支持。
@@ -52,6 +55,19 @@ python -m pip install .\dist\0.1.1\flora_render-0.1.1-cp313-cp313-win_amd64.whl
 目前仅通过 GitHub Releases 发布；请使用上面的明确 URL，不依赖 PyPI 上的同名项目。
 `install.py` 保留为 Windows 辅助工具，普通使用无需运行。
 
+### Windows DLSS RR 预发布
+
+在运行 GeoPhys 的 Windows x64 / CPython 3.13 环境中安装并检查版本。
+
+```powershell
+python -m pip install -r https://github.com/xio-md/Flora-runtime/releases/download/v0.1.3rc1/requirements.txt
+python -I -m flora_runtime
+```
+
+输出应显示 `version` 为 `0.1.3rc1` 和 `capabilities.dlss_rr` 为 `true`。
+DLSS RR 需要支持该功能的 NVIDIA RTX 显卡、兼容驱动和 Forge CUDA。
+窗口预览和无头出图见 [GeoPhys 使用指南](https://github.com/SCAILab-USTC/GeoPhys/blob/main/docs/guides/flora-usd-preview.md#快速开始)。
+
 ## Linux 测试版安装
 
 在 Ubuntu 24.04 x64 的常规 Python 3.13 环境中执行：
@@ -66,10 +82,10 @@ python3.13 -m pip install -r https://raw.githubusercontent.com/xio-md/Flora-runt
 
 ## 与 GeoPhys 使用
 
-把 wheel 安装到 **GeoPhys 使用的同一个 Python 环境**：
+把 wheel 安装到 **GeoPhys 使用的同一个 Python 环境**。需要自动光照、反射探针或 DLSS RR 时，
+使用 [Windows 预发布安装命令](#windows-dlss-rr-预发布)。使用正式版时，按实际位置替换以下 GeoPhys 路径。
 
 ```powershell
-# 可在任意目录运行；按实际位置替换 GeoPhys 路径。
 D:\work\GeoPhys\.venv\Scripts\python.exe -m pip install -r https://raw.githubusercontent.com/xio-md/Flora-runtime/main/requirements.txt
 ```
 

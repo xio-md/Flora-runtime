@@ -24,6 +24,12 @@ Windows 从 0.1.1 起，构建器从 Visual Studio 的 release x64 redist 目录
 用户不需要运行 `vc_redist.x64.exe`；DLL 随 wheel 安装在 native 模块和 VLM 工具旁。
 应用本地运行库的更新由维护者通过新 wheel 分发，构建时应使用受支持且已更新的工具链。
 
+可选的 Windows DLSS RR 构建使用 `FLORA_BUILD_DLSS_RR=ON`。发行清单声明 `dlss_rr`，
+校验器检查桥接 DLL、PTX 以及 NVIDIA DLSS SDK 310.9.16 的公开 release DLL 和许可文件。
+NVIDIA 组件按其独立许可提供。商业发布前须按 SDK 许可通知 NVIDIA，并在应用的启动画面、
+关于页面等适用位置提供 SDK 归属标识。
+参见 [NVIDIA RR 集成指南](https://github.com/NVIDIA/DLSS/blob/9981c6350dc58c0ce21f024fd65e31e851c31689/doc/DLSS-RR%20Integration%20Guide.pdf) 和 [SDK 许可](https://github.com/NVIDIA/DLSS/blob/9981c6350dc58c0ce21f024fd65e31e851c31689/LICENSE.txt)。
+
 普通用户通过 `pip install -r <公开 requirements.txt URL>` 或直接 wheel URL 安装，
 不要求克隆仓库或运行 `install.py`。若以后需要 `pip install flora-render` 的短包名入口，
 经所有者授权后把同一 wheel 上传到所控制的 PyPI 项目；不上传核心源码或 sdist。
