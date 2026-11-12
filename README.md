@@ -8,8 +8,8 @@ Flora 的二进制交付入口，供独立 Python 程序和 GeoPhys 使用。渲
 Windows 正式版 [**0.1.1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.1)
 已将所需 VC++ DLL 随 wheel 打包，无需另外安装运行库。
 
-Windows 预发布版 [**0.1.3rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.3rc1)
-支持 GeoPhys 的自动光照、反射探针和 DLSS RR 预览。安装命令见 [Windows DLSS RR 预发布](#windows-dlss-rr-预发布)。
+Windows 预发布版 [**0.1.4rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.4rc1)
+支持 GeoPhys 的自动光照、反射探针、Flora 自研超分和同步 CUDA 仿真中的刚体 DLSS RR。安装命令见 [Windows DLSS RR 预发布](#windows-dlss-rr-预发布)。
 
 Linux 测试版 [**0.1.2rc1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.2rc1)
 面向 **Ubuntu 24.04 x64 / CPython 3.13**。已通过编译、安装和原生导入检查，
@@ -62,11 +62,11 @@ python -m pip install .\dist\0.1.1\flora_render-0.1.1-cp313-cp313-win_amd64.whl
 在运行 GeoPhys 的 Windows x64 / CPython 3.13 环境中安装并检查版本。
 
 ```powershell
-python -m pip install -r https://github.com/xio-md/Flora-runtime/releases/download/v0.1.3rc1/requirements.txt
+python -m pip install -r https://github.com/xio-md/Flora-runtime/releases/download/v0.1.4rc1/requirements.txt
 python -I -m flora_runtime
 ```
 
-输出应显示 `version` 为 `0.1.3rc1` 和 `capabilities.dlss_rr` 为 `true`。
+输出应显示 `version` 为 `0.1.4rc1` 和 `capabilities.dlss_rr` 为 `true`。
 DLSS RR 需要支持该功能的 NVIDIA RTX 显卡、兼容驱动和 Forge CUDA。
 窗口预览和无头出图见 [GeoPhys 使用指南](https://github.com/SCAILab-USTC/GeoPhys/blob/main/docs/guides/flora-usd-preview.md#快速开始)。
 
@@ -84,11 +84,11 @@ python3.13 -m pip install -r https://raw.githubusercontent.com/xio-md/Flora-runt
 
 ## 与 GeoPhys 使用
 
-把 wheel 安装到 **GeoPhys 使用的同一个 Python 环境**。需要自动光照、反射探针或 DLSS RR 时，
-使用 [Windows 预发布安装命令](#windows-dlss-rr-预发布)。使用正式版时，按实际位置替换以下 GeoPhys 路径。
+把 wheel 安装到 **GeoPhys 使用的同一个 Python 环境**。以下命令安装支持自动光照、反射探针和
+DLSS RR 的 Windows 预发布版。请从 GeoPhys 仓库根目录运行。
 
 ```powershell
-D:\work\GeoPhys\.venv\Scripts\python.exe -m pip install -r https://raw.githubusercontent.com/xio-md/Flora-runtime/main/requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r https://github.com/xio-md/Flora-runtime/releases/download/v0.1.4rc1/requirements.txt
 ```
 
 然后在 GeoPhys 中：
@@ -110,6 +110,7 @@ visualizer = source.build_visualizer(backend="flora")  # source 为已有 GeoPhy
 - `flora_runtime`：安装位置发现、完整性诊断和用户缓存路径。
 - `FloraRenderPyNative.pyd`：原生渲染核心，内嵌编译后的着色器。
 - `flora-vlm-bake.exe`、`flora-vlm-inspect.exe`、`flora-vlm-delta.exe`：VLM 工具。
+- Windows RR 预发布版另带追踪器 PTX、Flora 的 RR 桥接 DLL、CUDA 运行库及 NVIDIA DLSS RR DLL。
 - `msvcp140.dll`、`vcruntime140.dll`、`vcruntime140_1.dll`：随包 VC++ 运行库，位于原生模块和工具旁。
 - `flora_runtime/licenses/`：Flora、第三方组件及 Microsoft runtime 的对应许可文本。
 
