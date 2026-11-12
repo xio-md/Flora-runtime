@@ -3,6 +3,8 @@
 Flora 的二进制交付入口，供独立 Python 程序和 GeoPhys 使用。渲染核心在私有仓库构建；
 本仓库保存安装脚本、版本清单和示例，wheel 通过 [Releases](https://github.com/xio-md/Flora-runtime/releases) 分发。
 
+有 Flora 源码访问权限的开发者，建议 [拉取主线并自行编译](https://github.com/SCAILab-USTC/Flora#构建)，以便及时获得渲染和烘焙修复。下方的 wheel 适合固定版本复现和无源码访问权限的用户。
+
 Windows 正式版 [**0.1.1**](https://github.com/xio-md/Flora-runtime/releases/tag/v0.1.1)
 已将所需 VC++ DLL 随 wheel 打包，无需另外安装运行库。
 

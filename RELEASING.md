@@ -3,10 +3,8 @@
 核心源码和构建脚本只保存在 Flora 私有仓库。公开仓库不需要访问私有仓库的 token，
 也不配置自动拉取私有源码的构建任务。
 
-1. 在私有仓库构建并运行 `tools/release/build_runtime_wheel.py`。脚本调用 Release 构建，
-   从显式文件清单生成 wheel，检查 x64 / CPython ABI / 原生依赖，并附带许可文本。
-2. 在本地 `dist/<版本>/` 准备四个文件：wheel、`release.json`、`requirements.txt`、`SHA256SUMS.txt`。
-   这个目录被 Git 忽略，二进制不进入 Git 历史。
+1. 在私有 Flora 仓库的 Actions 页面运行 **Windows wheel candidate** 或 **Linux wheel candidate**，选择源码分支并输入候选版本号。也可以在源码 checkout 中运行 `tools/release/build_runtime_wheel.py`。打包脚本检查 x64 / CPython ABI / 原生依赖，并附带许可文本。
+2. 将对应平台的候选 wheel、`release.json`、`requirements.txt` 和 `SHA256SUMS.txt` 放入本地 `dist/<版本>/`。云构建产物位于私有工作流的 Artifacts。Windows 与 Linux 的清单分别对应各自的 wheel。
 3. 执行 `python tools/verify_release.py dist/<版本>`，在新虚拟环境安装，运行
    `python -I examples/smoke.py`；再运行匹配 GeoPhys 的无窗口集成资格验证。
 4. 对于正式版，将经过验证的 `release.json` 复制为 `releases/<版本>.json`，将生成的 `requirements.txt`
